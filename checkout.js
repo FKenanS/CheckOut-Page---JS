@@ -10,6 +10,7 @@ let sepettekiler = [
   { name: "Antique Clock", price: 69.99, piece: 1, img: "./img/photo3.jpg" },
 ];
 
+//!URUNLERI EKRANA BASTIRMA
 sepettekiler.forEach(({ img, name, price, piece }) => {
   // dest
   //   const{img,name,price}=urun demek yerine foeach in icinde direk dest yapabiliriz
@@ -59,7 +60,7 @@ sepettekiler.forEach(({ img, name, price, piece }) => {
                   </div>
 
                   <div class="mt-2">
-                    Ürün Toplam: $<span class="product-total">${(price * 0.7 * piece).toFixed(2)} </span>
+                    Ürün Toplam: $<span class="product-total">${(price * 0.7 * piece).toFixed(2)}</span>
                   </div>
       </div>
     </div>
@@ -67,5 +68,45 @@ sepettekiler.forEach(({ img, name, price, piece }) => {
 </div>
     `;
 });
-//! inner html de kullanilan degerlerin ismini yazarken bosluk vs birakma yanina veya sonuna cunku hata verir kiyaslama yapmak istersek.
+//? inner html de kullanilan degerlerin ismini yazarken bosluk vs birakma yanina veya sonuna cunku hata verir kiyaslama yapmak istersek.
 
+//!Fiyat Hesaplama Fonksiyonu 
+// QuerySelectorAll ile butun fiyatlari cekip topluyoruz
+//ama cekme islemi domda degisiklik yapildiktan sonra yapilmasi lazim
+//nodelist olarak cekiyoruz o sebeple dizi haline getirip index ile ulasiyoruz
+//reduce ile toplama yapilamaz nodelist oldugu icin. DIZI HALINE GETIRIP REDUCE KULLANABILIRIZ
+
+// function olarak yazmaliyiz ki tekrar tekrar cagiralim
+
+function calculateCardTotal(){
+ const toplam =  document.querySelectorAll(`.product-total`)
+ //console.log(Array.from(toplam)) //nodelisti arraye cevirdik
+ const pToplam =Array.from(toplam).reduce((acc,item)=> acc + Number(item.textContent),0)
+ //console.log(pToplam) //domdan cekilen fiyatlar string olarak geliyor //!number a ceviriyoruz
+ // carpma cikarma islemi sadece stringlerde yapilir ondan number a cevirmeye gerek yok ama toplamada sarttir.
+
+ //!   querySelectorAll(), statik bir NodeList döndürür.
+  //!burada netten https://softauthor.com/javascript-htmlcollection-vs-nodelist/
+  // Dizi Değil!
+  // Bir NodeList bir dizi gibi görünebilir ama öyle değildir.
+  // Bir NodeList içinde döngü yapabilir ve düğümlerine dizine göre başvurabilirsiniz.
+  // Ancak, bir NodeList'te reduce(), push(), pop() veya join() gibi Array yöntemlerini kullanamazsınız.
+
+  //? pToplam= en alttaki tüm ürünler için vergi ve kargo hariç sepettekilerin indirimli fiyat toplamı
+  //?Reduce tam olarak Array istiyor, nodelist yeterli değil
+ document.querySelector(`.productstoplam`).textContent = pToplam.toFixed(2)
+ document.querySelector(`.vergi`).textContent = (pToplam * tax).toFixed(2)
+ document.querySelector(`.kargo`).textContent = pToplam ? shipping.toFixed(2) : 0.0.toFixed(2)
+ document.querySelector(`.toplam`).textContent = pToplam ? (pToplam + pToplam*tax + shipping).toFixed(2) : 0.0.toFixed(2)
+}
+removeButton();
+calculateCardTotal();
+
+//Silme Butonu
+function removeButton(){
+document.querySelectorAll(`.remove-product`).forEach((btn)=>btn.onclick=()=>{
+  //? ekrandan silme
+  btn.closest(`.card`).remove();
+  calculateCardTotal(); //todo silme islemi yapildiktan sonra toplam fiyatin guncellenmesi gerekir.
+})
+}
