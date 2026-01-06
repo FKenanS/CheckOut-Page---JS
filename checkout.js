@@ -78,14 +78,14 @@ sepettekiler.forEach(({ img, name, price, piece }) => {
 
 // function olarak yazmaliyiz ki tekrar tekrar cagiralim
 
-function calculateCardTotal(){
- const toplam =  document.querySelectorAll(`.product-total`)
- //console.log(Array.from(toplam)) //nodelisti arraye cevirdik
- const pToplam =Array.from(toplam).reduce((acc,item)=> acc + Number(item.textContent),0)
- //console.log(pToplam) //domdan cekilen fiyatlar string olarak geliyor //!number a ceviriyoruz
- // carpma cikarma islemi sadece stringlerde yapilir ondan number a cevirmeye gerek yok ama toplamada sarttir.
+function calculateCardTotal() {
+  const toplam = document.querySelectorAll(`.product-total`)
+  //console.log(Array.from(toplam)) //nodelisti arraye cevirdik
+  const pToplam = Array.from(toplam).reduce((acc, item) => acc + Number(item.textContent), 0)
+  //console.log(pToplam) //domdan cekilen fiyatlar string olarak geliyor //!number a ceviriyoruz
+  // carpma cikarma islemi sadece stringlerde yapilir ondan number a cevirmeye gerek yok ama toplamada sarttir.
 
- //!   querySelectorAll(), statik bir NodeList döndürür.
+  //!   querySelectorAll(), statik bir NodeList döndürür.
   //!burada netten https://softauthor.com/javascript-htmlcollection-vs-nodelist/
   // Dizi Değil!
   // Bir NodeList bir dizi gibi görünebilir ama öyle değildir.
@@ -94,19 +94,80 @@ function calculateCardTotal(){
 
   //? pToplam= en alttaki tüm ürünler için vergi ve kargo hariç sepettekilerin indirimli fiyat toplamı
   //?Reduce tam olarak Array istiyor, nodelist yeterli değil
- document.querySelector(`.productstoplam`).textContent = pToplam.toFixed(2)
- document.querySelector(`.vergi`).textContent = (pToplam * tax).toFixed(2)
- document.querySelector(`.kargo`).textContent = pToplam ? shipping.toFixed(2) : 0.0.toFixed(2)
- document.querySelector(`.toplam`).textContent = pToplam ? (pToplam + pToplam*tax + shipping).toFixed(2) : 0.0.toFixed(2)
+  document.querySelector(`.productstoplam`).textContent = pToplam.toFixed(2)
+  document.querySelector(`.vergi`).textContent = (pToplam * tax).toFixed(2)
+  document.querySelector(`.kargo`).textContent = pToplam ? shipping.toFixed(2) : 0.0.toFixed(2)
+  document.querySelector(`.toplam`).textContent = pToplam ? (pToplam + pToplam * tax + shipping).toFixed(2) : 0.0.toFixed(2)
 }
-removeButton();
 calculateCardTotal();
+removeButton();
+pieceButton();
 
-//Silme Butonu
-function removeButton(){
-document.querySelectorAll(`.remove-product`).forEach((btn)=>btn.onclick=()=>{
-  //? ekrandan silme
-  btn.closest(`.card`).remove();
-  calculateCardTotal(); //todo silme islemi yapildiktan sonra toplam fiyatin guncellenmesi gerekir.
-})
+
+//!Silme Butonu
+function removeButton() {
+  document.querySelectorAll(`.remove-product`).forEach((btn) => btn.onclick = () => {
+    //? ekrandan silme
+    btn.closest(`.card`).remove();
+    calculateCardTotal(); //todo silme islemi yapildiktan sonra toplam fiyatin guncellenmesi gerekir.
+  })
 }
+
+//! Adet Arttırma Azaltma Butonları
+
+function pieceButton() {
+  document.querySelectorAll(`.adet-controller`).forEach((box) => {
+    const plus = box.lastElementChild
+    const minus = box.firstElementChild
+    const adet = plus.previousElementSibling  // box[1] ortadaki p etiketi ayni sey farkli yazim sekili sadece
+    //!plus butonuna basınca olacaklar
+    plus.onclick = () => {
+      //ekranda adet güncelledik
+      adet.textContent = +adet.textContent + 1 // string to number yapip 1 ekledik + ile
+      //fiyat guncellemesi
+      plus.closest(`.card-body`).querySelector(`.product-total`).textContent = (plus.closest(`.card-body`).querySelector(`.indirim-price`).textContent * adet.textContent).toFixed(2)
+      calculateCardTotal();
+    }
+    //!minus butonuna basınca olacaklar
+    minus.onclick = () => {
+
+      //ekranda adet güncelledik
+      adet.textContent = +adet.textContent - 1;
+      //fiyat guncellemesi
+      minus.closest(`.card-body`).querySelector(`.product-total`).textContent = (minus.closest(`.card-body`).querySelector(`.indirim-price`).textContent * adet.textContent).toFixed(2)
+      calculateCardTotal();
+      //!adet 1 iken minus a basılırsa ürün ekrandan silinsin
+      if (adet.textContent < 1) {
+        alert("sileyim mi?");
+        minus.closest(`.card`).remove();
+        calculateCardTotal(); //todo silme islemi yapildiktan sonra toplam fiyatin guncellenmesi gerekir.
+      }
+    }
+  })
+}
+
+
+//! bubbling islemi 
+
+let flag = false;
+
+const h1 = document.querySelector(`h1`);
+
+h1.onclick = (e) => {
+  flag = !flag;
+  flag ? h1.textContent = `Checkout Page` : h1.textContent = `Sepet Sayfasi`;
+  //!calis ve sonra parentini etkileme
+  e.stopPropagation();
+}
+
+let header = document.querySelector(`header`);
+
+header.onclick = () => {
+  flag = !flag;
+  flag ? h1.textContent = `Parent` : h1.textContent = `Div`;
+}
+
+//burdaki yapi ile tasiyici ve parent elementlere onclick yapildiginda
+//tasiyici div olan baskin olur bunu engellmek icin stopPropagation kullanilir
+// div icerisinde birden fazla onclick yapisi varsa bu sekilde engelelenebilir.
+
