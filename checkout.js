@@ -15,6 +15,8 @@ sepettekiler.forEach(({ img, name, price, piece }) => {
   // dest
   //   const{img,name,price}=urun demek yerine foeach in icinde direk dest yapabiliriz
 
+
+  //! NOTE: Production'da innerHTML += yerine insertAdjacentHTML tercih edilir
   document.querySelector("#product-rowlari").innerHTML += `
     <div class="card mb-3" style="max-width: 540px;">
 
