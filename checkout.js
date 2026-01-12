@@ -103,6 +103,8 @@ function calculateCardTotal() {
 }
 calculateCardTotal();
 removeButton();
+
+
 pieceButton();
 
 
